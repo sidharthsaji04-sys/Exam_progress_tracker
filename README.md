@@ -20,9 +20,9 @@ The program uses:
 | Code | Meaning |
 | --- | --- |
 | c | Concept mistake |
-| a | Attention mistake |
+| a | Avoided while studying|
 | n | Not revised |
-| p | Practice needed |
+| p | Exam pressure |
 | x | No mistake |
 
 ## Files
