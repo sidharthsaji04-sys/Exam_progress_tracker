@@ -2,12 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
 
-df=pd.read_csv('progress.csv')
-df['mistakes']=df['mistakes'].str.split(',')
+df = pd.DataFrame(columns=['subject', 'mark', 'mistakes'])
+df.to_csv('progress.csv', index=False)
+
 
 root=tk.Tk()
 root.title('Exam Progress Tracker')
-root.geometry('1000x500')
+root.geometry('1000x800')
 
 subject=tk.Label(root,text='Subject',font=('Arial',12))
 subject_entry=tk.Entry(root,width=20,font=('Arial',12))
@@ -17,10 +18,22 @@ mark=tk.Label(root,text='Mark',font=('Arial',12))
 mark_entry=tk.Entry(root,width=20,font=('Arial',12))
 mark.pack()
 mark_entry.pack()
-mistakes=tk.Label(root,text='Mistakes (c-conceptual,p-exam pressure,n-not studied,l- lack of practise,x-nothing)',font=('Arial',12))
-mistakes_entry=tk.Entry(root,width=20,font=('Arial',12))
-mistakes.pack()
-mistakes_entry.pack()
+mistakes_label = tk.Label(root, text='Mistakes', font=('Arial', 12))
+mistakes_label.pack()
+
+mistake_vars = {
+    'c': tk.IntVar(),
+    'p': tk.IntVar(),
+    'n': tk.IntVar(),
+    'l': tk.IntVar(),
+    'x': tk.IntVar()
+}
+
+tk.Checkbutton(root, text='c - conceptual', variable=mistake_vars['c']).pack()
+tk.Checkbutton(root, text='p - exam pressure', variable=mistake_vars['p']).pack()
+tk.Checkbutton(root, text='n - not studied', variable=mistake_vars['n']).pack()
+tk.Checkbutton(root, text='l - lack of practise', variable=mistake_vars['l']).pack()
+tk.Checkbutton(root, text='x - nothing', variable=mistake_vars['x']).pack()
 
 title=tk.Label(root,text='Exam Progress Tracker',font=('Arial',16,'bold'))
 title.pack(pady=10)
@@ -41,20 +54,20 @@ class Progress:
                 output.delete('1.0','end')
                 output.insert('end','Please enter a valid integer for mark.')
                 return
-            mistake_values = {'c': 4, 'n': 3,'l': 2,'p': 1, 'x': 0}
-            valid_mistakes = mistake_values.keys()  
-            mistakes = mistakes_entry.get().split(',')
-            for m in mistakes:
-                if m not in valid_mistakes:
-                    output.insert('end', f'Invalid mistake: {m}. Use c, n, l, p, or x only.')
-                    return  
+            mistakes = [code for code, var in mistake_vars.items() if var.get() == 1]
+            if not mistakes:
+             output.delete('1.0', 'end')
+             output.insert('end', 'Please select at least one mistake.')
+             return
             new_row={'subject':subject,'mark':mark,'mistakes':mistakes}
             self.df.loc[len(self.df)]=new_row
             self.df.to_csv('progress.csv',index=False)
             subject_entry.delete(0,'end')
             mark_entry.delete(0,'end')  
-            mistakes_entry.delete(0,'end')
-            output.insert('end','Subject added successfully!'
+            
+            for var in mistake_vars.values():
+             var.set(0)
+            output.insert('end','👍'
             ) 
             return
 
@@ -78,6 +91,10 @@ class Progress:
             return 'Keep this momentum'
 
     def analyse(self):
+        if self.df.empty:
+            output.delete('1.0','end')
+            output.insert('end','No data available to analyze.')
+            return
         results = []
         for _, row in self.df.iterrows():
             subject= row['subject']
@@ -101,7 +118,7 @@ class Progress:
             output.delete('1.0','end')
             output.insert('end','No data available to plot.')
             return
-        self.df.plot(x='subject', y='mark', kind='bar')
+        self.df.plot(x='mark', y='subject', kind='bar')
         plt.title('Progress Graph')
         plt.ylabel('Subject')
         plt.xlabel('Marks')

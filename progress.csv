@@ -1,2 +1,6 @@
-Unnamed: 0,subject,mark,mistakes
-
+subject,mark,mistakes
+physics,18,"['c', 'n', 'l']"
+chemistry,22,"['c', 'n']"
+biology,22,['n']
+maths,17,['p']
+english,24,['x']
